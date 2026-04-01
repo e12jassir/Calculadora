@@ -1,0 +1,7 @@
+# Calculadora Científica - Dependencias
+# ======================================
+#
+# Instalar con: pip install -r requirements.txt
+#
+
+PyQt6>=6.5.0
