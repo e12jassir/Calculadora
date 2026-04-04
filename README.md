@@ -1,4 +1,4 @@
-# Calculadora Científica v2.0.0
+# Calculadora Científica v1.1
 
 Calculadora científica profesional con interfaz gráfica moderna, parser matemático seguro y herramientas avanzadas.
 
