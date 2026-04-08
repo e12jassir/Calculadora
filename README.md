@@ -16,8 +16,56 @@ Calculadora científica profesional con interfaz gráfica moderna, parser matem�
 
 ## Instalación
 
+### Requisitos
+
+- **Python 3.12+** (se recomienda 3.12 para compatibilidad total con PyQt6)
+- **Windows 10/11**
+- **PyQt6>=6.5.0**
+
+### Windows (método recomendado)
+
+1. **Instalar Python 3.12:**
+   Descarga e instala Python desde [python.org](https://www.python.org/downloads/) o usa winget:
+   ```powershell
+   winget install Python.Python.3.12
+   ```
+
+2. **Clonar el repositorio:**
+   ```powershell
+   git clone https://github.com/tu-usuario/Calculadora.git
+   cd Calculadora
+   ```
+
+3. **Crear entorno virtual (recomendado):**
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\python.exe -m pip install -r requirements.txt
+   ```
+
+4. **Instalar dependencias:**
+   ```powershell
+   .\venv\Scripts\python.exe -m pip install -r requirements.txt
+   ```
+
+### Linux/macOS
+
 ```bash
+git clone https://github.com/tu-usuario/Calculadora.git
+cd Calculadora
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Docker (opcional)
+
+```dockerfile
+FROM python:3.12-slim
+RUN apt-get update && apt-get install -y pyqt6
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+CMD ["python", "main.py"]
 ```
 
 ## Uso
