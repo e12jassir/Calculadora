@@ -1,4 +1,4 @@
-# Calculadora Científica v1.1
+# Calculadora Científica v1.2
 
 Calculadora científica profesional con interfaz gráfica moderna, parser matemático seguro y herramientas avanzadas.
 
@@ -18,92 +18,60 @@ Calculadora científica profesional con interfaz gráfica moderna, parser matem�
 
 ### Requisitos
 
-- **Python 3.12+** (se recomienda 3.12 para compatibilidad total con PyQt6)
-- **Windows 10/11**
+- **Python 3.11+**
 - **PyQt6>=6.5.0**
 
-### Windows (método recomendado)
+### Windows
 
-1. **Instalar Python 3.12:**
-   Descarga e instala Python desde [python.org](https://www.python.org/downloads/) o usa winget:
+1. **Clonar el repositorio:**
    ```powershell
-   winget install Python.Python.3.12
-   ```
-
-2. **Clonar el repositorio:**
-   ```powershell
-   git clone https://github.com/tu-usuario/Calculadora.git
+   git clone https://github.com/e12jassir/Calculadora.git
    cd Calculadora
    ```
 
-3. **Crear entorno virtual (recomendado):**
+2. **Crear entorno virtual e instalar dependencias:**
    ```powershell
    python -m venv venv
    .\venv\Scripts\python.exe -m pip install -r requirements.txt
    ```
 
-4. **Instalar dependencias:**
+3. **Ejecutar:**
    ```powershell
-   .\venv\Scripts\python.exe -m pip install -r requirements.txt
+   .\venv\Scripts\python.exe main.py
    ```
 
-### Linux/macOS
+### Linux / macOS
 
 ```bash
-git clone https://github.com/tu-usuario/Calculadora.git
+git clone https://github.com/e12jassir/Calculadora.git
 cd Calculadora
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
-
-### Docker (opcional)
-
-```dockerfile
-FROM python:3.12-slim
-RUN apt-get update && apt-get install -y pyqt6
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
-CMD ["python", "main.py"]
-```
-
-## Uso
-
-```bash
 python main.py
-# o
-python calculadora.py
 ```
 
 ## Estructura del Proyecto
 
 ```
-calculadora/
+Calculadora/
 ├── main.py                 # Punto de entrada principal
 ├── calculadora.py          # Punto de entrada alternativo
 ├── requirements.txt        # Dependencias
 ├── src/
-│   ├── __init__.py
 │   ├── core/
-│   │   ├── __init__.py
 │   │   ├── parser.py       # Parser matemático seguro
 │   │   ├── history.py      # Gestor de historial
 │   │   └── constants.py    # Constantes matemáticas
 │   ├── ui/
-│   │   ├── __init__.py
 │   │   ├── calculator_ui.py # Interfaz principal
 │   │   └── themes.py       # Sistema de temas
 │   └── utils/
-│       ├── __init__.py
 │       └── converter.py    # Conversor de unidades
-├── tests/
-│   ├── __init__.py
-│   ├── test_parser.py      # Tests del parser
-│   ├── test_history.py     # Tests del historial
-│   └── test_converter.py   # Tests del conversor
-├── docs/                   # Documentación
-└── config/                 # Configuración
+└── tests/
+    ├── test_parser.py      # Tests del parser
+    ├── test_history.py     # Tests del historial
+    └── test_converter.py   # Tests del conversor
 ```
 
 ## Atajos de Teclado
@@ -151,6 +119,7 @@ calculadora/
 ## Tests
 
 ```bash
+pip install pytest
 pytest tests/ -v
 ```
 
