@@ -38,3 +38,6 @@ Thumbs.db
 
 # Project specific
 *.history.json
+.pytest_cache/
+calculadora_export.txt
+.calculadora_history.json

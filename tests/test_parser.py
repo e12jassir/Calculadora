@@ -36,6 +36,9 @@ class TestBasicOperations:
     def test_power(self, parser):
         assert parser.evaluate("2 ^ 3") == 8.0
 
+    def test_power_right_associative(self, parser):
+        assert parser.evaluate("2 ^ 3 ^ 2") == 512.0
+
     def test_order_of_operations(self, parser):
         assert parser.evaluate("2 + 3 * 4") == 14.0
 
@@ -135,6 +138,15 @@ class TestImplicitMultiplication:
 
     def test_number_function(self, parser):
         assert parser.evaluate("2sqrt(9)") == 6.0
+
+    def test_paren_constant(self, parser):
+        assert abs(parser.evaluate("(2+1)pi") - (3 * math.pi)) < 1e-10
+
+    def test_constant_paren(self, parser):
+        assert abs(parser.evaluate("pi(2)") - (2 * math.pi)) < 1e-10
+
+    def test_paren_function(self, parser):
+        assert abs(parser.evaluate("(2)sin(30)") - 1.0) < 1e-10
 
 
 class TestEdgeCases:

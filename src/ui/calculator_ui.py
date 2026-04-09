@@ -5,15 +5,14 @@ para teclado, memoria, conversor de unidades y más.
 """
 
 import math
-import sys
 
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QAction, QFont, QKeySequence
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QFont, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
     QDialog,
-    QFrame,
+    QGraphicsDropShadowEffect,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -21,14 +20,9 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMainWindow,
-    QMenu,
-    QMenuBar,
     QMessageBox,
     QPushButton,
     QSizePolicy,
-    QSplitter,
-    QStatusBar,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -53,8 +47,16 @@ class CalcButton(QPushButton):
         self.btn_type = btn_type
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.setMinimumSize(50, 50)
-        self.setFont(QFont('Segoe UI', 14))
+        self.setMinimumSize(54, 54)
+        self.setFont(QFont('Segoe UI', 15))
+        self._set_shadow()
+
+    def _set_shadow(self) -> None:
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(12)
+        shadow.setOffset(0, 2)
+        shadow.setColor(Qt.GlobalColor.black)
+        self.setGraphicsEffect(shadow)
 
     def apply_theme(self, theme) -> None:
         """Aplica el tema al botón."""
@@ -103,10 +105,10 @@ class CalcButton(QPushButton):
             QPushButton {{
                 background-color: {bg};
                 color: {text_color};
-                border: none;
-                border-radius: 12px;
+                border: 1px solid {theme.BORDER};
+                border-radius: 14px;
                 padding: 10px;
-                font-weight: 500;
+                font-weight: 600;
             }}
             QPushButton:hover {{
                 background-color: {hover};
@@ -124,39 +126,44 @@ class DisplayPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._setup_ui()
+        self._set_shadow()
+
+    def _set_shadow(self) -> None:
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(28)
+        shadow.setOffset(0, 5)
+        shadow.setColor(Qt.GlobalColor.black)
+        self.setGraphicsEffect(shadow)
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(15, 10, 15, 10)
-        layout.setSpacing(5)
+        layout.setContentsMargins(18, 14, 18, 14)
+        layout.setSpacing(4)
 
         self.expression_label = QLabel("")
         self.expression_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.expression_label.setFont(QFont('Segoe UI', 14))
+        self.expression_label.setFont(QFont('Segoe UI', 11, QFont.Weight.Medium))
         self.expression_label.setStyleSheet("color: #8E8E93;")
         self.expression_label.setWordWrap(True)
+        self.expression_label.setMinimumHeight(20)
+        self.expression_label.setMaximumHeight(34)
 
         self.result_label = QLabel("0")
         self.result_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.result_label.setFont(QFont('Segoe UI', 36, QFont.Weight.Light))
+        self.result_label.setFont(QFont('Segoe UI', 38, QFont.Weight.Light))
         self.result_label.setWordWrap(True)
         self.result_label.setMinimumHeight(60)
 
-        self.memory_indicator = QLabel("")
-        self.memory_indicator.setFont(QFont('Segoe UI', 10, QFont.Weight.Bold))
-        self.memory_indicator.setStyleSheet("color: #FF9500;")
-
-        indicator_layout = QHBoxLayout()
-        indicator_layout.addStretch()
-        indicator_layout.addWidget(self.memory_indicator)
-        indicator_layout.addStretch()
-
-        layout.addWidget(self.expression_label)
         layout.addWidget(self.result_label)
-        layout.addLayout(indicator_layout)
+        layout.addWidget(self.expression_label)
 
     def set_expression(self, text: str) -> None:
         self.expression_label.setText(text)
+        self._fit_expression_font(text)
+
+    def set_preview(self, text: str) -> None:
+        self.expression_label.setText(text)
+        self._fit_expression_font(text)
 
     def set_result(self, text: str) -> None:
         self.result_label.setText(text)
@@ -165,14 +172,30 @@ class DisplayPanel(QWidget):
         self.expression_label.setText("")
         self.result_label.setText("0")
 
-    def set_memory_indicator(self, has_memory: bool) -> None:
-        self.memory_indicator.setText("M" if has_memory else "")
+    def _fit_expression_font(self, text: str) -> None:
+        text_len = len(text)
+        if text_len <= 12:
+            size = 12
+        elif text_len <= 22:
+            size = 11
+        elif text_len <= 32:
+            size = 10
+        else:
+            size = 9
+
+        self.expression_label.setFont(QFont('Segoe UI', size, QFont.Weight.Medium))
 
     def apply_theme(self, theme) -> None:
-        self.expression_label.setStyleSheet(f"color: {theme.TEXT_SECONDARY};")
+        self.expression_label.setStyleSheet(
+            f"color: {theme.TEXT_SECONDARY};"
+            " background-color: transparent;"
+            " border: none;"
+            " padding: 0px 6px 2px 6px;"
+        )
         self.result_label.setStyleSheet(f"color: {theme.TEXT_PRIMARY};")
         self.setStyleSheet(
-            f"background-color: {theme.BACKGROUND}; border-radius: 15px;"
+            f"background: {theme.PANEL_GRADIENT};"
+            f" border: 1px solid {theme.BORDER}; border-radius: 18px;"
         )
 
 
@@ -227,16 +250,17 @@ class HistoryDialog(QDialog):
             QListWidget {{
                 background-color: {self.theme.SECONDARY_BG};
                 color: {self.theme.TEXT_PRIMARY};
-                border-radius: 8px;
+                border: 1px solid {self.theme.BORDER};
+                border-radius: 12px;
             }}
             QListWidget::item {{ padding: 8px; }}
             QListWidget::item:selected {{ background-color: {self.theme.ACCENT}; }}
             QPushButton {{
                 background-color: {self.theme.BUTTON_SPECIAL};
                 color: {self.theme.TEXT_PRIMARY};
-                border: none;
-                border-radius: 8px;
-                padding: 8px 15px;
+                border: 1px solid {self.theme.BORDER};
+                border-radius: 10px;
+                padding: 9px 15px;
             }}
             QPushButton:hover {{ background-color: {self.theme.BUTTON_SPECIAL_HOVER}; }}
             """
@@ -329,23 +353,23 @@ class ConverterDialog(QDialog):
                 background-color: {self.theme.SECONDARY_BG};
                 color: {self.theme.TEXT_PRIMARY};
                 border: 1px solid {self.theme.BORDER};
-                border-radius: 6px;
-                padding: 5px;
+                border-radius: 8px;
+                padding: 6px;
             }}
             QLineEdit {{
                 background-color: {self.theme.SECONDARY_BG};
                 color: {self.theme.TEXT_PRIMARY};
                 border: 1px solid {self.theme.BORDER};
-                border-radius: 6px;
-                padding: 8px;
+                border-radius: 8px;
+                padding: 10px;
                 font-size: 16px;
             }}
             QPushButton {{
                 background-color: {self.theme.BUTTON_EQUALS};
                 color: #FFFFFF;
-                border: none;
-                border-radius: 8px;
-                padding: 10px;
+                border: 1px solid {self.theme.BUTTON_EQUALS};
+                border-radius: 10px;
+                padding: 11px;
                 font-weight: bold;
             }}
             QPushButton:hover {{ background-color: {self.theme.BUTTON_EQUALS_HOVER}; }}
@@ -397,11 +421,13 @@ class CalculatorWindow(QMainWindow):
         self.history = history
         self.current_expression = ""
         self.last_result = "0"
+        self.has_last_result = False
         self.angle_mode = 'deg'
         self.theme_name = 'dark'
         self.theme = get_theme(self.theme_name)
         self.variables = {}
         self.memory = 0.0
+        self.has_memory = False
         self._second_mode = False
 
         self.setWindowTitle("Calculadora Científica")
@@ -413,7 +439,7 @@ class CalculatorWindow(QMainWindow):
         self._setup_statusbar()
         self._apply_theme()
         self._setup_shortcuts()
-        self._update_memory_indicator()
+        self._update_mode_indicator()
 
     def _setup_ui(self) -> None:
         central = QWidget()
@@ -424,17 +450,6 @@ class CalculatorWindow(QMainWindow):
 
         self.display = DisplayPanel()
         main_layout.addWidget(self.display)
-
-        self.mode_label = QLabel("DEG")
-        self.mode_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.mode_label.setFont(QFont('Segoe UI', 10))
-        self.mode_label.setStyleSheet("color: #FF9500; font-weight: bold;")
-
-        mode_layout = QHBoxLayout()
-        mode_layout.addStretch()
-        mode_layout.addWidget(self.mode_label)
-        mode_layout.addStretch()
-        main_layout.addLayout(mode_layout)
 
         buttons_widget = QWidget()
         self.buttons_layout = QGridLayout(buttons_widget)
@@ -580,10 +595,35 @@ class CalculatorWindow(QMainWindow):
         help_menu.addAction(shortcuts_action)
 
     def _setup_statusbar(self) -> None:
+        self.mode_indicator = QLabel("")
+        self.mode_indicator.setFont(QFont('Segoe UI', 10, QFont.Weight.DemiBold))
+        self.statusBar().addPermanentWidget(self.mode_indicator)
         self.statusBar().showMessage("Listo")
 
     def _setup_shortcuts(self) -> None:
-        pass
+        shortcuts = [
+            ("Ctrl+D", lambda: self._change_theme('dark')),
+            ("Ctrl+L", lambda: self._change_theme('light')),
+            ("Ctrl+H", self._show_history),
+            ("Ctrl+U", self._show_converter),
+            ("Ctrl+G", lambda: self._set_angle_mode('deg')),
+            ("Ctrl+R", lambda: self._set_angle_mode('rad')),
+            ("Ctrl+C", self._copy_result),
+            ("Ctrl+V", self._paste_expression),
+            ("Ctrl+Q", self.close),
+            ("F1", self._show_shortcuts),
+            ("Return", self._on_equals),
+            ("Enter", self._on_equals),
+            ("Backspace", self._on_delete),
+            ("Escape", self._on_clear),
+            ("Delete", self._on_clear),
+        ]
+
+        self._shortcuts = []
+        for sequence, handler in shortcuts:
+            shortcut = QShortcut(QKeySequence(sequence), self)
+            shortcut.activated.connect(handler)
+            self._shortcuts.append(shortcut)
 
     def keyPressEvent(self, event) -> None:
         key = event.key()
@@ -635,19 +675,23 @@ class CalculatorWindow(QMainWindow):
         self.setStyleSheet(
             f"""
             QMainWindow {{
-                background-color: {self.theme.BACKGROUND};
+                background: {self.theme.WINDOW_GRADIENT};
             }}
             QMenuBar {{
-                background-color: {self.theme.SECONDARY_BG};
+                background: {self.theme.SECONDARY_BG};
                 color: {self.theme.TEXT_PRIMARY};
+                border: none;
+                padding: 4px;
             }}
             QMenuBar::item:selected {{
                 background-color: {self.theme.TERTIARY_BG};
+                border-radius: 6px;
             }}
             QMenu {{
                 background-color: {self.theme.SECONDARY_BG};
                 color: {self.theme.TEXT_PRIMARY};
                 border: 1px solid {self.theme.BORDER};
+                border-radius: 8px;
             }}
             QMenu::item:selected {{
                 background-color: {self.theme.ACCENT};
@@ -655,8 +699,15 @@ class CalculatorWindow(QMainWindow):
             QStatusBar {{
                 background-color: {self.theme.SECONDARY_BG};
                 color: {self.theme.TEXT_SECONDARY};
+                border-top: 1px solid {self.theme.BORDER};
             }}
             """
+        )
+        self.mode_indicator.setStyleSheet(
+            f"background-color: {self.theme.TERTIARY_BG};"
+            f" color: {self.theme.TEXT_PRIMARY};"
+            f" border: 1px solid {self.theme.BORDER};"
+            " border-radius: 7px; padding: 2px 8px;"
         )
 
     def _change_theme(self, theme_name: str) -> None:
@@ -668,21 +719,39 @@ class CalculatorWindow(QMainWindow):
     def _set_angle_mode(self, mode: str) -> None:
         self.angle_mode = mode
         self.parser.set_angle_mode(mode)
-        self.mode_label.setText(mode.upper())
+        self._update_mode_indicator()
         self.statusBar().showMessage(f"Modo: {mode.upper()}")
 
     def _on_number(self, digit: str) -> None:
-        if self.last_result != "0" and not self.current_expression:
+        if self.has_last_result and not self.current_expression:
             self.current_expression = ""
 
         self.current_expression += digit
         self._update_display()
 
     def _on_operator(self, op: str) -> None:
-        if self.current_expression:
+        if not self.current_expression:
+            if self.has_last_result:
+                self.current_expression = self.last_result + op
+            elif op == '-':
+                self.current_expression = '-'
+            self._update_display()
+            return
+
+        last = self.current_expression[-1]
+        if last in '+*/^':
+            self.current_expression = self.current_expression[:-1] + op
+        elif last == '-':
+            if len(self.current_expression) > 1 and self.current_expression[-2] in '+-*/^(':
+                if op != '-':
+                    self.current_expression = self.current_expression[:-1] + op
+            else:
+                self.current_expression = self.current_expression[:-1] + op
+        elif last == '(':
+            if op == '-':
+                self.current_expression += op
+        else:
             self.current_expression += op
-        elif self.last_result != "0":
-            self.current_expression = self.last_result + op
         self._update_display()
 
     def _on_decimal(self) -> None:
@@ -693,14 +762,18 @@ class CalculatorWindow(QMainWindow):
         self._update_display()
 
     def _on_open_paren(self) -> None:
-        if self.current_expression and self.current_expression[-1].isdigit():
-            self.current_expression += '*('
-        else:
-            self.current_expression += '('
+        self._append_with_implicit('(')
         self._update_display()
 
     def _on_close_paren(self) -> None:
-        self.current_expression += ')'
+        if not self.current_expression:
+            return
+
+        if self.current_expression[-1] in '+-*/^(':
+            return
+
+        if self.current_expression.count('(') > self.current_expression.count(')'):
+            self.current_expression += ')'
         self._update_display()
 
     def _on_percent(self) -> None:
@@ -726,14 +799,14 @@ class CalculatorWindow(QMainWindow):
     def _on_square(self) -> None:
         if self.current_expression:
             self.current_expression += '^2'
-        elif self.last_result != "0":
+        elif self.has_last_result:
             self.current_expression = f"({self.last_result})^2"
         self._update_display()
 
     def _on_cube(self) -> None:
         if self.current_expression:
             self.current_expression += '^3'
-        elif self.last_result != "0":
+        elif self.has_last_result:
             self.current_expression = f"({self.last_result})^3"
         self._update_display()
 
@@ -744,31 +817,32 @@ class CalculatorWindow(QMainWindow):
     def _on_sqrt(self) -> None:
         if self.current_expression:
             self.current_expression = f"sqrt({self.current_expression})"
-        elif self.last_result != "0":
+        elif self.has_last_result:
             self.current_expression = f"sqrt({self.last_result})"
         self._update_display()
 
     def _on_factorial(self) -> None:
         if self.current_expression:
             self.current_expression += '!'
-        elif self.last_result != "0":
+        elif self.has_last_result:
             self.current_expression = f"({self.last_result})!"
         self._update_display()
 
     def _on_function(self, func_name: str) -> None:
-        self.current_expression += f"{func_name}("
+        self._append_with_implicit(f"{func_name}(")
         self._update_display()
 
     def _on_constant(self, const: str) -> None:
-        if const == 'pi':
-            self.current_expression += 'π'
-        elif const == 'e':
-            self.current_expression += 'e'
+        symbol = 'π' if const == 'pi' else 'e'
+        self._append_with_implicit(symbol)
         self._update_display()
 
     def _on_answer(self) -> None:
-        if self.last_result != "0":
-            self.current_expression += self.last_result
+        if self.has_last_result:
+            value = self.last_result
+            if self._needs_implicit_multiplication():
+                self.current_expression += '*'
+            self.current_expression += f"({value})" if value.startswith('-') else value
             self._update_display()
 
     def _on_2nd(self) -> None:
@@ -819,29 +893,28 @@ class CalculatorWindow(QMainWindow):
                             lambda checked=False, f=original_key: self._on_function(f)
                         )
 
-        label = "2ND" if self._second_mode else "DEG"
-        color = "#0A84FF" if self._second_mode else "#FF9500"
-        self.mode_label.setText(label)
-        self.mode_label.setStyleSheet(f"color: {color}; font-weight: bold;")
+        self._update_mode_indicator()
+        self.statusBar().showMessage(
+            f"Modo secundario: {'activado' if self._second_mode else 'desactivado'}"
+        )
 
     def _on_10x(self) -> None:
         if self.current_expression:
             self.current_expression = f"10^({self.current_expression})"
-        elif self.last_result != "0":
+        elif self.has_last_result:
             self.current_expression = f"10^({self.last_result})"
         self._update_display()
 
     def _on_exp(self) -> None:
         if self.current_expression:
             self.current_expression = f"exp({self.current_expression})"
-        elif self.last_result != "0":
+        elif self.has_last_result:
             self.current_expression = f"exp({self.last_result})"
         self._update_display()
 
     def _on_clear(self) -> None:
         self.current_expression = ""
         self.display.clear()
-        self.last_result = "0"
         self.statusBar().showMessage("Limpiado")
 
     def _on_delete(self) -> None:
@@ -866,33 +939,35 @@ class CalculatorWindow(QMainWindow):
         if not self.current_expression:
             return
 
+        self._auto_close_parentheses()
+
         try:
             result = self.parser.evaluate(self.current_expression, self.variables)
             formatted = self._format_result(result)
 
             self.history.add(self.current_expression, formatted, self.angle_mode)
 
-            self.display.set_expression(f"{self.current_expression} =")
+            self.display.set_expression("")
             self.display.set_result(formatted)
 
             self.last_result = formatted
+            self.has_last_result = True
             self.current_expression = ""
 
             self.statusBar().showMessage("Calculado")
 
         except Exception as e:
             self.display.set_result("Error")
-            self.display.set_expression(str(e))
+            self.display.set_expression("")
             self.statusBar().showMessage(f"Error: {e}")
-            self.last_result = "0"
 
     def _on_memory_clear(self) -> None:
         self.memory = 0.0
-        self._update_memory_indicator()
+        self.has_memory = False
         self.statusBar().showMessage("Memoria limpiada")
 
     def _on_memory_recall(self) -> None:
-        if self.memory != 0:
+        if self.has_memory:
             formatted = self._format_result(self.memory)
             self.current_expression += formatted
             self._update_display()
@@ -902,13 +977,13 @@ class CalculatorWindow(QMainWindow):
         try:
             if self.current_expression:
                 value = self.parser.evaluate(self.current_expression, self.variables)
-            elif self.last_result != "0":
+            elif self.has_last_result:
                 value = float(self.last_result)
             else:
                 return
 
             self.memory += value
-            self._update_memory_indicator()
+            self.has_memory = True
             self.statusBar().showMessage(f"M+ = {self._format_result(self.memory)}")
         except Exception:
             self.statusBar().showMessage("Error en M+")
@@ -917,19 +992,22 @@ class CalculatorWindow(QMainWindow):
         try:
             if self.current_expression:
                 value = self.parser.evaluate(self.current_expression, self.variables)
-            elif self.last_result != "0":
+            elif self.has_last_result:
                 value = float(self.last_result)
             else:
                 return
 
             self.memory -= value
-            self._update_memory_indicator()
+            self.has_memory = True
             self.statusBar().showMessage(f"M- = {self._format_result(self.memory)}")
         except Exception:
             self.statusBar().showMessage("Error en M-")
 
-    def _update_memory_indicator(self) -> None:
-        self.display.set_memory_indicator(self.memory != 0)
+    def _update_mode_indicator(self) -> None:
+        mode_text = self.angle_mode.upper()
+        if self._second_mode:
+            mode_text = f"{mode_text} · 2ND"
+        self.mode_indicator.setText(mode_text)
 
     def _copy_result(self) -> None:
         QApplication.clipboard().setText(self.display.result_label.text())
@@ -954,10 +1032,10 @@ class CalculatorWindow(QMainWindow):
         QMessageBox.information(
             self,
             "Acerca de",
-            "Calculadora Científica v2.0.0\n\n"
+            "Calculadora Científica v2.1.0\n\n"
             "Parser matemático seguro (sin eval)\n"
-            "Funciones trigonométricas, logarítmicas, estadísticas\n"
-            "Historial persistente, conversor de unidades\n"
+            "Funciones trigonométricas, logarítmicas y conversor de unidades\n"
+            "Historial persistente y atajos de teclado\n"
             "Temas oscuro y claro, soporte completo de teclado",
         )
 
@@ -986,6 +1064,24 @@ class CalculatorWindow(QMainWindow):
         msg.setWindowTitle("Atajos de Teclado")
         msg.setText(shortcuts_text)
         msg.exec()
+
+    def _append_with_implicit(self, token: str) -> None:
+        if self._needs_implicit_multiplication():
+            self.current_expression += '*'
+        self.current_expression += token
+
+    def _needs_implicit_multiplication(self) -> bool:
+        if not self.current_expression:
+            return False
+
+        last = self.current_expression[-1]
+        return last.isdigit() or last in (')', '!', '%', 'π', 'e')
+
+    def _auto_close_parentheses(self) -> None:
+        opens = self.current_expression.count('(')
+        closes = self.current_expression.count(')')
+        if opens > closes:
+            self.current_expression += ')' * (opens - closes)
 
     def _format_result(self, value: float) -> str:
         """Formatea un resultado numérico."""
@@ -1028,4 +1124,16 @@ class CalculatorWindow(QMainWindow):
         """Actualiza el display con la expresión actual."""
         display_text = self.current_expression
         display_text = display_text.replace('*', '×').replace('/', '÷')
+
         self.display.set_result(display_text if display_text else "0")
+
+        if not self.current_expression:
+            self.display.set_preview("")
+            return
+
+        try:
+            preview = self.parser.evaluate(self.current_expression, self.variables)
+            preview_text = self._format_result(preview)
+            self.display.set_preview(f"= {preview_text}")
+        except Exception:
+            self.display.set_preview("")

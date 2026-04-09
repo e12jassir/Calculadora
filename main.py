@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Calculadora Científica v2.0.0
+"""Calculadora Científica v2.1.0
 
 Aplicación de calculadora científica con interfaz gráfica moderna.
 Soporta funciones trigonométricas, logarítmicas, parser seguro,
@@ -18,7 +18,7 @@ Características:
     - Historial con persistencia en JSON
     - Temas oscuro/claro
     - Soporte completo para teclado físico
-    - Variables y memoria
+    - Memoria de cálculo
     - Conversor de unidades integrado
 """
 
@@ -38,7 +38,7 @@ def main():
     """Punto de entrada principal de la aplicación."""
     app = QApplication(sys.argv)
     app.setApplicationName("Calculadora Científica")
-    app.setApplicationVersion("2.0.0")
+    app.setApplicationVersion("2.1.0")
     app.setOrganizationName("ScientificCalc")
 
     parser = ExpressionParser(angle_mode='deg')

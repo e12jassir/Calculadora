@@ -1,127 +1,126 @@
-# Calculadora Científica v1.2
+# Calculadora Cientifica v2.1.0
 
-Calculadora científica profesional con interfaz gráfica moderna, parser matemático seguro y herramientas avanzadas.
+Aplicacion de calculadora cientifica de escritorio en PyQt6, con parser matematico propio (sin `eval`), historial persistente y conversor de unidades.
 
-## Características
+## Que hace diferente a este proyecto
 
-- **Parser matemático seguro** - Implementación recursiva descendente sin uso de `eval()`
-- **Funciones completas** - Trigonométricas, logarítmicas, exponenciales, factorial, potencias
-- **Modo 2nd** - Funciones inversas (asin, acos, atan, exp, 10^x)
-- **Memoria** - MC, MR, M+, M- con indicador visual
-- **Historial persistente** - Guardado en JSON, exportable a texto
-- **Conversor de unidades** - Longitud, masa, temperatura, ángulos, tiempo
-- **Temas** - Oscuro y claro
-- **Teclado físico completo** - Todos los atajos documentados
-- **Botón Ans** - Reutiliza el último resultado
+- Parser recursivo descendente escrito a mano (`src/core/parser.py`), sin ejecucion dinamica insegura.
+- Soporte de notacion natural: multiplicacion implicita (`2pi`, `2(3+4)`, `(2)sin(30)`), porcentaje y factorial.
+- Modo angular en grados o radianes para trigonometria directa e inversa.
+- Interfaz moderna en PyQt6 con temas claro/oscuro, atajos completos y vista previa de resultado mientras escribes.
+- Historial en JSON y exportacion a texto plano.
+- Conversor integrado para longitud, masa, temperatura, angulos y tiempo.
 
-## Instalación
+## Captura funcional de la UX
+
+- Linea principal: expresion actual (grande, legible).
+- Linea secundaria: resultado previo en vivo (`= ...`), mas discreto.
+- Al pulsar `=`: se confirma el resultado final y se limpia la vista previa.
+- Estado de modo (`DEG`, `RAD`, `2ND`) visible en la barra inferior sin invadir el display.
+
+## Instalacion
 
 ### Requisitos
 
-- **Python 3.11+**
-- **PyQt6>=6.5.0**
-
-### Windows
-
-1. **Clonar el repositorio:**
-   ```powershell
-   git clone https://github.com/e12jassir/Calculadora.git
-   cd Calculadora
-   ```
-
-2. **Crear entorno virtual e instalar dependencias:**
-   ```powershell
-   python -m venv venv
-   .\venv\Scripts\python.exe -m pip install -r requirements.txt
-   ```
-
-3. **Ejecutar:**
-   ```powershell
-   .\venv\Scripts\python.exe main.py
-   ```
+- Python 3.11+
+- Pip actualizado
 
 ### Linux / macOS
 
 ```bash
 git clone https://github.com/e12jassir/Calculadora.git
 cd Calculadora
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 main.py
+```
+
+### Windows (PowerShell)
+
+```powershell
+git clone https://github.com/e12jassir/Calculadora.git
+cd Calculadora
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python main.py
 ```
 
-## Estructura del Proyecto
+## Atajos de teclado
 
-```
-Calculadora/
-├── main.py                 # Punto de entrada principal
-├── calculadora.py          # Punto de entrada alternativo
-├── requirements.txt        # Dependencias
-├── src/
-│   ├── core/
-│   │   ├── parser.py       # Parser matemático seguro
-│   │   ├── history.py      # Gestor de historial
-│   │   └── constants.py    # Constantes matemáticas
-│   ├── ui/
-│   │   ├── calculator_ui.py # Interfaz principal
-│   │   └── themes.py       # Sistema de temas
-│   └── utils/
-│       └── converter.py    # Conversor de unidades
-└── tests/
-    ├── test_parser.py      # Tests del parser
-    ├── test_history.py     # Tests del historial
-    └── test_converter.py   # Tests del conversor
-```
-
-## Atajos de Teclado
-
-| Atajo | Acción |
-|-------|--------|
-| `Ctrl+D` | Tema oscuro |
-| `Ctrl+L` | Tema claro |
-| `Ctrl+H` | Historial |
-| `Ctrl+U` | Conversor de unidades |
+| Atajo | Accion |
+|---|---|
+| `Enter` | Calcular |
+| `Backspace` | Borrar ultimo caracter |
+| `Escape` o `Delete` | Limpiar expresion |
 | `Ctrl+G` | Modo grados |
 | `Ctrl+R` | Modo radianes |
+| `Ctrl+H` | Abrir historial |
+| `Ctrl+U` | Abrir conversor |
+| `Ctrl+D` | Tema oscuro |
+| `Ctrl+L` | Tema claro |
 | `Ctrl+C` | Copiar resultado |
-| `Ctrl+V` | Pegar expresión |
-| `Ctrl+Q` | Salir |
-| `F1` | Ayuda de atajos |
-| `Enter` | Calcular |
-| `Backspace` | Borrar último carácter |
-| `Escape` | Limpiar todo |
-| `^` | Potencia |
-| `!` | Factorial |
+| `Ctrl+V` | Pegar expresion |
+| `F1` | Mostrar ayuda de atajos |
 
-## Funciones Matemáticas
+## Funciones y constantes soportadas
 
-| Función | Descripción |
-|---------|-------------|
-| `sin`, `cos`, `tan` | Trigonométricas |
-| `asin`, `acos`, `atan` | Trigonométricas inversas |
-| `sinh`, `cosh`, `tanh` | Hiperbólicas |
-| `ln`, `log`, `log2` | Logaritmos |
-| `sqrt`, `cbrt` | Raíces |
-| `abs`, `ceil`, `floor` | Utilidades |
-| `exp` | Exponencial |
-| `fact` | Factorial |
+### Funciones
 
-## Constantes
+- Trigonometricas: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
+- Logaritmicas: `ln`, `log`, `log2`
+- Exponenciales y raices: `exp`, `sqrt`, `cbrt`
+- Utilidades: `abs`, `ceil`, `floor`
+- Operadores especiales: `^`, `!`, `%`
 
-| Constante | Valor |
-|-----------|-------|
-| `π`, `pi` | 3.14159... |
-| `e` | 2.71828... |
-| `τ`, `tau` | 6.28318... |
-| `φ`, `phi` | 1.61803... |
+### Constantes
 
-## Tests
+- `pi`, `π`
+- `e`
+- `tau`, `τ`
+- `phi`, `φ`
+
+## Estructura del proyecto
+
+```text
+Calculadora/
+|- main.py
+|- calculadora.py
+|- requirements.txt
+|- src/
+|  |- core/
+|  |  |- parser.py
+|  |  |- history.py
+|  |  |- constants.py
+|  |- ui/
+|  |  |- calculator_ui.py
+|  |  |- themes.py
+|  |- utils/
+|     |- converter.py
+|- tests/
+|  |- test_parser.py
+|  |- test_history.py
+|  |- test_converter.py
+|- .github/workflows/ci.yml
+```
+
+## Calidad y pruebas
+
+- Tests unitarios con `pytest`.
+- CI en GitHub Actions para Python 3.11 y 3.12.
+
+Ejecutar local:
 
 ```bash
-pip install pytest
-pytest tests/ -v
+python3 -m pytest -q
 ```
+
+## Notas tecnicas
+
+- El parser evita `eval` y valida la expresion con tokens y gramatica formal.
+- La potencia es asociativa a la derecha (`2 ^ 3 ^ 2 == 512`).
+- La memoria y el historial se manejan fuera del parser para mantener separacion de responsabilidades.
 
 ## Licencia
 

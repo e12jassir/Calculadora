@@ -8,7 +8,7 @@ from dataclasses import dataclass
 class AppInfo:
     """Información de la aplicación."""
     NAME: str = "Calculadora Científica"
-    VERSION: str = "2.0.0"
+    VERSION: str = "2.1.0"
     ORGANIZATION: str = "ScientificCalc"
 
 

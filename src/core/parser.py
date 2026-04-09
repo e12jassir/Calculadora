@@ -207,7 +207,7 @@ class Parser:
     Gramática:
         expr   : term ((+|-) term)*
         term   : power ((*|/) power)*
-        power  : unary (^ unary)*
+        power  : unary (^ power)?
         unary  : -unary | +unary | postfix
         postfix: primary (! | %)*
         primary: NUMBER | CONST | FUNC(expr) | (expr)
@@ -289,12 +289,12 @@ class Parser:
         return result
 
     def _power(self) -> float:
-        """power : unary (^ unary)*"""
+        """power : unary (^ power)? (asociativo a la derecha)"""
         result = self._unary()
 
-        while self._current().type == TokenType.POWER:
+        if self._current().type == TokenType.POWER:
             self._consume()
-            exponent = self._unary()
+            exponent = self._power()
             try:
                 result = result ** exponent
             except OverflowError:
@@ -469,15 +469,21 @@ class ExpressionParser:
         func_names = '|'.join(
             sorted(self.lexer.FUNCTIONS.keys(), key=len, reverse=True)
         )
+        constants_regex = r'pi|π|tau|τ|phi|φ'
 
         patterns = [
             (r'(?<![a-z_])(\d)(\()', r'\1*\2'),
             (r'(\))(\d)', r'\1*\2'),
             (r'(\))(\()', r'\1*\2'),
-            (r'(\d)(pi|π|tau|τ|phi|φ)', r'\1*\2'),
-            (r'(pi|π|tau|τ|phi|φ)(\d)', r'\1*\2'),
+            (r'(\d)(' + constants_regex + r')', r'\1*\2'),
+            (r'(' + constants_regex + r')(\d)', r'\1*\2'),
+            (r'(\))(' + constants_regex + r')', r'\1*\2'),
+            (r'(' + constants_regex + r')(\()', r'\1*\2'),
             (r'(\d)(e)(?![0-9+\-]|xp)', r'\1*\2'),
+            (r'(\))(e)(?!xp)', r'\1*\2'),
+            (r'(e)(\()', r'\1*\2'),
             (r'(\d)(' + func_names + r')', r'\1*\2'),
+            (r'(\))(' + func_names + r')', r'\1*\2'),
         ]
 
         for pattern, replacement in patterns:
