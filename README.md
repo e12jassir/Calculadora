@@ -1,127 +1,79 @@
-# Calculadora Cientifica v2.1.0
+# 🧮 Scientific Calculator Pro
 
-Aplicacion de calculadora cientifica de escritorio en PyQt6, con parser matematico propio (sin `eval`), historial persistente y conversor de unidades.
+A high-performance, architecturally sound scientific calculator built with Python and PyQt6. This isn't just a simple calculator; it's a demonstration of software engineering principles applied to a classic problem.
 
-## Que hace diferente a este proyecto
+## 🚀 Features
 
-- Parser recursivo descendente escrito a mano (`src/core/parser.py`), sin ejecucion dinamica insegura.
-- Soporte de notacion natural: multiplicacion implicita (`2pi`, `2(3+4)`, `(2)sin(30)`), porcentaje y factorial.
-- Modo angular en grados o radianes para trigonometria directa e inversa.
-- Interfaz moderna en PyQt6 con temas claro/oscuro, atajos completos y vista previa de resultado mientras escribes.
-- Historial en JSON y exportacion a texto plano.
-- Conversor integrado para longitud, masa, temperatura, angulos y tiempo.
+- **Advanced Mathematical Engine**:
+  - Full support for trigonometric, logarithmic, and exponential functions.
+  - **Recursive Descent Parser**: Custom-built parser that handles operator precedence and associativity (including right-associativity for powers `^`) without using the dangerous `eval()` function.
+  - **Implicit Multiplication**: Supports natural mathematical notation, e.g., `2(3 + 4)` is correctly interpreted as `2 * (3 + 4)`.
+  - **Right-to-Left Power**: Correctly handles `2^3^2` as `2^(3^2) = 512`.
+- **Professional UX**:
+  - **MVVM Architecture**: Complete separation between Logic (Model), State Management (ViewModel), and Presentation (View).
+  - **2nd Function Mode**: Toggle between primary and inverse functions (e.g., `sin` $\rightarrow$ `asin`).
+  - **Smart Display**: Real-time expression preview as you type.
+  - **Memory Management**: Full `MC`, `MR`, `M+`, `M-` functionality.
+  - **Calculation History**: Persistent history of all previous operations.
+  - **Unit Converter**: Integrated tool for common unit conversions.
+  - **Theme Support**: Built-in Dark and Light modes.
+  - **Keyboard Integration**: Full support for keyboard shortcuts and numeric keypad.
+- **Developer-Centric**:
+  - **Full Test Suite**: Unit tests for the ViewModel ensuring rock-solid reliability.
 
-## Captura funcional de la UX
+## 🛠️ Architect's Corner
 
-- Linea principal: expresion actual (grande, legible).
-- Linea secundaria: resultado previo en vivo (`= ...`), mas discreto.
-- Al pulsar `=`: se confirma el resultado final y se limpia la vista previa.
-- Estado de modo (`DEG`, `RAD`, `2ND`) visible en la barra inferior sin invadir el display.
+### The "No-Eval" Philosophy
+Most beginner calculators use Python's `eval()` to process expressions. This is a critical security flaw and a sign of poor engineering. This project implements a **Recursive Descent Parser**, which tokenizes the input and builds an abstract understanding of the mathematical hierarchy. This ensures:
+1. **Security**: No arbitrary code execution.
+2. **Control**: Precise handling of mathematical rules (like implicit multiplication).
 
-## Instalacion
+### MVVM Pattern
+To avoid the "God Object" anti-pattern, the project follows the **Model-View-ViewModel (MVVM)** pattern:
+- **Model**: The `ExpressionParser` and `HistoryManager`. They handle raw data and math.
+- **ViewModel**: The `CalculatorViewModel`. It manages the application state, formats data for the UI, and handles business logic.
+- **View**: The `CalculatorWindow`. A "dumb" layer that only renders the state provided by the ViewModel and forwards user events.
 
-### Requisitos
+**Benefit**: This decoupling allows for effortless testing of the logic without launching a GUI and makes the app ready for future migrations (e.g., to a web or mobile interface).
 
-- Python 3.11+
-- Pip actualizado
+## 💻 Tech Stack
 
-### Linux / macOS
+- **Language**: Python 3.12+
+- **GUI Framework**: PyQt6
+- **Testing**: Pytest
+- **Packaging**: PyInstaller
 
-```bash
-git clone https://github.com/e12jassir/Calculadora.git
-cd Calculadora
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python3 main.py
-```
+## ⚙️ Installation & Setup
 
-### Windows (PowerShell)
+### Prerequisites
+- Python 3.12+
+- pip (Python package manager)
 
-```powershell
-git clone https://github.com/e12jassir/Calculadora.git
-cd Calculadora
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python main.py
-```
+### Quick Start
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/scientific-calculator.git
+   cd scientific-calculator
+   ```
 
-## Atajos de teclado
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-| Atajo | Accion |
-|---|---|
-| `Enter` | Calcular |
-| `Backspace` | Borrar ultimo caracter |
-| `Escape` o `Delete` | Limpiar expresion |
-| `Ctrl+G` | Modo grados |
-| `Ctrl+R` | Modo radianes |
-| `Ctrl+H` | Abrir historial |
-| `Ctrl+U` | Abrir conversor |
-| `Ctrl+D` | Tema oscuro |
-| `Ctrl+L` | Tema claro |
-| `Ctrl+C` | Copiar resultado |
-| `Ctrl+V` | Pegar expresion |
-| `F1` | Mostrar ayuda de atajos |
+3. **Run the application**:
+   ```bash
+   python main.py
+   ```
 
-## Funciones y constantes soportadas
+## 🧪 Running Tests
 
-### Funciones
-
-- Trigonometricas: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
-- Logaritmicas: `ln`, `log`, `log2`
-- Exponenciales y raices: `exp`, `sqrt`, `cbrt`
-- Utilidades: `abs`, `ceil`, `floor`
-- Operadores especiales: `^`, `!`, `%`
-
-### Constantes
-
-- `pi`, `π`
-- `e`
-- `tau`, `τ`
-- `phi`, `φ`
-
-## Estructura del proyecto
-
-```text
-Calculadora/
-|- main.py
-|- calculadora.py
-|- requirements.txt
-|- src/
-|  |- core/
-|  |  |- parser.py
-|  |  |- history.py
-|  |  |- constants.py
-|  |- ui/
-|  |  |- calculator_ui.py
-|  |  |- themes.py
-|  |- utils/
-|     |- converter.py
-|- tests/
-|  |- test_parser.py
-|  |- test_history.py
-|  |- test_converter.py
-|- .github/workflows/ci.yml
-```
-
-## Calidad y pruebas
-
-- Tests unitarios con `pytest`.
-- CI en GitHub Actions para Python 3.11 y 3.12.
-
-Ejecutar local:
+The project includes a comprehensive test suite to ensure mathematical accuracy and state stability.
 
 ```bash
-python3 -m pytest -q
+# Run all tests
+python -m pytest
 ```
 
-## Notas tecnicas
-
-- El parser evita `eval` y valida la expresion con tokens y gramatica formal.
-- La potencia es asociativa a la derecha (`2 ^ 3 ^ 2 == 512`).
-- La memoria y el historial se manejan fuera del parser para mantener separacion de responsabilidades.
-
-## Licencia
-
-MIT
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.

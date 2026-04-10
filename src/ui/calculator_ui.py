@@ -34,21 +34,21 @@ class CalcButton(QPushButton):
     """Botón personalizado con estilos según tipo."""
 
     TYPES = {
-        'number': 'number',
-        'operator': 'operator',
-        'function': 'function',
-        'special': 'special',
-        'equals': 'equals',
-        'memory': 'memory',
+        "number": "number",
+        "operator": "operator",
+        "function": "function",
+        "special": "special",
+        "equals": "equals",
+        "memory": "memory",
     }
 
-    def __init__(self, text: str, btn_type: str = 'number', parent=None):
+    def __init__(self, text: str, btn_type: str = "number", parent=None):
         super().__init__(text, parent)
         self.btn_type = btn_type
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumSize(54, 54)
-        self.setFont(QFont('Segoe UI', 15))
+        self.setFont(QFont("Segoe UI", 15))
         self._set_shadow()
 
     def _set_shadow(self) -> None:
@@ -61,43 +61,41 @@ class CalcButton(QPushButton):
     def apply_theme(self, theme) -> None:
         """Aplica el tema al botón."""
         colors = {
-            'number': (
+            "number": (
                 theme.BUTTON_NUMBER,
                 theme.BUTTON_NUMBER_HOVER,
                 theme.BUTTON_NUMBER_PRESSED,
             ),
-            'operator': (
+            "operator": (
                 theme.BUTTON_OPERATOR,
                 theme.BUTTON_OPERATOR_HOVER,
                 theme.BUTTON_OPERATOR_PRESSED,
             ),
-            'function': (
+            "function": (
                 theme.BUTTON_FUNCTION,
                 theme.BUTTON_FUNCTION_HOVER,
                 theme.BUTTON_FUNCTION_PRESSED,
             ),
-            'special': (
+            "special": (
                 theme.BUTTON_SPECIAL,
                 theme.BUTTON_SPECIAL_HOVER,
                 theme.BUTTON_SPECIAL_PRESSED,
             ),
-            'equals': (
+            "equals": (
                 theme.BUTTON_EQUALS,
                 theme.BUTTON_EQUALS_HOVER,
                 theme.BUTTON_EQUALS_PRESSED,
             ),
-            'memory': (
+            "memory": (
                 theme.BUTTON_MEMORY,
                 theme.BUTTON_MEMORY_HOVER,
                 theme.BUTTON_MEMORY_PRESSED,
             ),
         }
 
-        bg, hover, pressed = colors.get(self.btn_type, colors['number'])
+        bg, hover, pressed = colors.get(self.btn_type, colors["number"])
         text_color = (
-            '#FFFFFF'
-            if self.btn_type in ('operator', 'equals')
-            else theme.TEXT_PRIMARY
+            "#FFFFFF" if self.btn_type in ("operator", "equals") else theme.TEXT_PRIMARY
         )
 
         self.setStyleSheet(
@@ -142,7 +140,7 @@ class DisplayPanel(QWidget):
 
         self.expression_label = QLabel("")
         self.expression_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.expression_label.setFont(QFont('Segoe UI', 11, QFont.Weight.Medium))
+        self.expression_label.setFont(QFont("Segoe UI", 11, QFont.Weight.Medium))
         self.expression_label.setStyleSheet("color: #8E8E93;")
         self.expression_label.setWordWrap(True)
         self.expression_label.setMinimumHeight(20)
@@ -150,7 +148,7 @@ class DisplayPanel(QWidget):
 
         self.result_label = QLabel("0")
         self.result_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.result_label.setFont(QFont('Segoe UI', 38, QFont.Weight.Light))
+        self.result_label.setFont(QFont("Segoe UI", 38, QFont.Weight.Light))
         self.result_label.setWordWrap(True)
         self.result_label.setMinimumHeight(60)
 
@@ -183,7 +181,7 @@ class DisplayPanel(QWidget):
         else:
             size = 9
 
-        self.expression_label.setFont(QFont('Segoe UI', size, QFont.Weight.Medium))
+        self.expression_label.setFont(QFont("Segoe UI", size, QFont.Weight.Medium))
 
     def apply_theme(self, theme) -> None:
         self.expression_label.setStyleSheet(
@@ -214,7 +212,7 @@ class HistoryDialog(QDialog):
         layout = QVBoxLayout(self)
 
         self.list_widget = QListWidget()
-        self.list_widget.setFont(QFont('Consolas', 11))
+        self.list_widget.setFont(QFont("Consolas", 11))
 
         for record in self.history.get_all():
             item_text = f"{record.expression} = {record.result}"
@@ -311,9 +309,7 @@ class ConverterDialog(QDialog):
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
 
-        self.category_combo = self._create_combo(
-            self.converter.get_categories()
-        )
+        self.category_combo = self._create_combo(self.converter.get_categories())
         self.category_combo.currentTextChanged.connect(self._update_units)
 
         row = QHBoxLayout()
@@ -334,7 +330,7 @@ class ConverterDialog(QDialog):
 
         self.value_input = self._create_line_edit("0")
         self.result_label = QLabel("Resultado: 0")
-        self.result_label.setFont(QFont('Segoe UI', 16))
+        self.result_label.setFont(QFont("Segoe UI", 16))
         self.result_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         convert_btn = QPushButton("Convertir")
@@ -406,7 +402,7 @@ class ConverterDialog(QDialog):
             to_unit = self.to_combo.currentText()
 
             result = self.converter.convert(value, category, from_unit, to_unit)
-            formatted = f"{result:.10g}".rstrip('0').rstrip('.')
+            formatted = f"{result:.10g}".rstrip("0").rstrip(".")
             self.result_label.setText(f"Resultado: {formatted}")
         except ValueError as e:
             self.result_label.setText(f"Error: {e}")
@@ -415,20 +411,11 @@ class ConverterDialog(QDialog):
 class CalculatorWindow(QMainWindow):
     """Ventana principal de la calculadora científica."""
 
-    def __init__(self, parser, history, parent=None):
+    def __init__(self, view_model, parent=None):
         super().__init__(parent)
-        self.parser = parser
-        self.history = history
-        self.current_expression = ""
-        self.last_result = "0"
-        self.has_last_result = False
-        self.angle_mode = 'deg'
-        self.theme_name = 'dark'
+        self.view_model = view_model
+        self.theme_name = "dark"
         self.theme = get_theme(self.theme_name)
-        self.variables = {}
-        self.memory = 0.0
-        self.has_memory = False
-        self._second_mode = False
 
         self.setWindowTitle("Calculadora Científica")
         self.setMinimumSize(420, 700)
@@ -439,6 +426,10 @@ class CalculatorWindow(QMainWindow):
         self._setup_statusbar()
         self._apply_theme()
         self._setup_shortcuts()
+
+        # Vincular el ViewModel con la actualización de la UI
+        self.view_model.on_state_changed = self._update_display
+        self._update_display()
         self._update_mode_indicator()
 
     def _setup_ui(self) -> None:
@@ -459,60 +450,60 @@ class CalculatorWindow(QMainWindow):
 
         button_config = [
             [
-                ('MC', 'memory', self._on_memory_clear),
-                ('MR', 'memory', self._on_memory_recall),
-                ('M+', 'memory', self._on_memory_add),
-                ('M-', 'memory', self._on_memory_subtract),
-                ('AC', 'special', self._on_clear),
+                ("MC", "memory", self._on_memory_clear),
+                ("MR", "memory", self._on_memory_recall),
+                ("M+", "memory", self._on_memory_add),
+                ("M-", "memory", self._on_memory_subtract),
+                ("AC", "special", self._on_clear),
             ],
             [
-                ('2nd', 'function', self._on_2nd),
-                ('sin', 'function', lambda: self._on_function('sin')),
-                ('cos', 'function', lambda: self._on_function('cos')),
-                ('tan', 'function', lambda: self._on_function('tan')),
-                ('DEL', 'special', self._on_delete),
+                ("2nd", "function", self._on_2nd),
+                ("sin", "function", lambda: self._on_function("sin")),
+                ("cos", "function", lambda: self._on_function("cos")),
+                ("tan", "function", lambda: self._on_function("tan")),
+                ("DEL", "special", self._on_delete),
             ],
             [
-                ('x²', 'function', self._on_square),
-                ('x³', 'function', self._on_cube),
-                ('xⁿ', 'function', self._on_power),
-                ('√', 'function', self._on_sqrt),
-                ('/', 'operator', lambda: self._on_operator('/')),
+                ("x²", "function", self._on_square),
+                ("x³", "function", self._on_cube),
+                ("xⁿ", "function", self._on_power),
+                ("√", "function", self._on_sqrt),
+                ("/", "operator", lambda: self._on_operator("/")),
             ],
             [
-                ('ln', 'function', lambda: self._on_function('ln')),
-                ('log', 'function', lambda: self._on_function('log')),
-                ('(', 'function', self._on_open_paren),
-                (')', 'function', self._on_close_paren),
-                ('×', 'operator', lambda: self._on_operator('*')),
+                ("ln", "function", lambda: self._on_function("ln")),
+                ("log", "function", lambda: self._on_function("log")),
+                ("(", "function", self._on_open_paren),
+                (")", "function", self._on_close_paren),
+                ("×", "operator", lambda: self._on_operator("*")),
             ],
             [
-                ('7', 'number', lambda: self._on_number('7')),
-                ('8', 'number', lambda: self._on_number('8')),
-                ('9', 'number', lambda: self._on_number('9')),
-                ('%', 'function', self._on_percent),
-                ('-', 'operator', lambda: self._on_operator('-')),
+                ("7", "number", lambda: self._on_number("7")),
+                ("8", "number", lambda: self._on_number("8")),
+                ("9", "number", lambda: self._on_number("9")),
+                ("%", "function", self._on_percent),
+                ("-", "operator", lambda: self._on_operator("-")),
             ],
             [
-                ('4', 'number', lambda: self._on_number('4')),
-                ('5', 'number', lambda: self._on_number('5')),
-                ('6', 'number', lambda: self._on_number('6')),
-                ('π', 'function', lambda: self._on_constant('pi')),
-                ('+', 'operator', lambda: self._on_operator('+')),
+                ("4", "number", lambda: self._on_number("4")),
+                ("5", "number", lambda: self._on_number("5")),
+                ("6", "number", lambda: self._on_number("6")),
+                ("π", "function", lambda: self._on_constant("pi")),
+                ("+", "operator", lambda: self._on_operator("+")),
             ],
             [
-                ('1', 'number', lambda: self._on_number('1')),
-                ('2', 'number', lambda: self._on_number('2')),
-                ('3', 'number', lambda: self._on_number('3')),
-                ('e', 'function', lambda: self._on_constant('e')),
-                ('=', 'equals', self._on_equals),
+                ("1", "number", lambda: self._on_number("1")),
+                ("2", "number", lambda: self._on_number("2")),
+                ("3", "number", lambda: self._on_number("3")),
+                ("e", "function", lambda: self._on_constant("e")),
+                ("=", "equals", self._on_equals),
             ],
             [
-                ('0', 'number', lambda: self._on_number('0')),
-                ('.', 'number', self._on_decimal),
-                ('+/-', 'function', self._on_negate),
-                ('n!', 'function', self._on_factorial),
-                ('Ans', 'function', self._on_answer),
+                ("0", "number", lambda: self._on_number("0")),
+                (".", "number", self._on_decimal),
+                ("+/-", "function", self._on_negate),
+                ("n!", "function", self._on_factorial),
+                ("Ans", "function", self._on_answer),
             ],
         ]
 
@@ -532,12 +523,12 @@ class CalculatorWindow(QMainWindow):
 
         dark_action = QAction("Tema oscuro", self)
         dark_action.setShortcut("Ctrl+D")
-        dark_action.triggered.connect(lambda: self._change_theme('dark'))
+        dark_action.triggered.connect(lambda: self._change_theme("dark"))
         view_menu.addAction(dark_action)
 
         light_action = QAction("Tema claro", self)
         light_action.setShortcut("Ctrl+L")
-        light_action.triggered.connect(lambda: self._change_theme('light'))
+        light_action.triggered.connect(lambda: self._change_theme("light"))
         view_menu.addAction(light_action)
 
         view_menu.addSeparator()
@@ -556,12 +547,12 @@ class CalculatorWindow(QMainWindow):
 
         deg_action = QAction("Modo Grados (DEG)", self)
         deg_action.setShortcut("Ctrl+G")
-        deg_action.triggered.connect(lambda: self._set_angle_mode('deg'))
+        deg_action.triggered.connect(lambda: self._set_angle_mode("deg"))
         calc_menu.addAction(deg_action)
 
         rad_action = QAction("Modo Radianes (RAD)", self)
         rad_action.setShortcut("Ctrl+R")
-        rad_action.triggered.connect(lambda: self._set_angle_mode('rad'))
+        rad_action.triggered.connect(lambda: self._set_angle_mode("rad"))
         calc_menu.addAction(rad_action)
 
         calc_menu.addSeparator()
@@ -596,18 +587,18 @@ class CalculatorWindow(QMainWindow):
 
     def _setup_statusbar(self) -> None:
         self.mode_indicator = QLabel("")
-        self.mode_indicator.setFont(QFont('Segoe UI', 10, QFont.Weight.DemiBold))
+        self.mode_indicator.setFont(QFont("Segoe UI", 10, QFont.Weight.DemiBold))
         self.statusBar().addPermanentWidget(self.mode_indicator)
         self.statusBar().showMessage("Listo")
 
     def _setup_shortcuts(self) -> None:
         shortcuts = [
-            ("Ctrl+D", lambda: self._change_theme('dark')),
-            ("Ctrl+L", lambda: self._change_theme('light')),
+            ("Ctrl+D", lambda: self._change_theme("dark")),
+            ("Ctrl+L", lambda: self._change_theme("light")),
             ("Ctrl+H", self._show_history),
             ("Ctrl+U", self._show_converter),
-            ("Ctrl+G", lambda: self._set_angle_mode('deg')),
-            ("Ctrl+R", lambda: self._set_angle_mode('rad')),
+            ("Ctrl+G", lambda: self._set_angle_mode("deg")),
+            ("Ctrl+R", lambda: self._set_angle_mode("rad")),
             ("Ctrl+C", self._copy_result),
             ("Ctrl+V", self._paste_expression),
             ("Ctrl+Q", self.close),
@@ -631,28 +622,28 @@ class CalculatorWindow(QMainWindow):
 
         if text.isdigit():
             self._on_number(text)
-        elif text == '+':
-            self._on_operator('+')
-        elif text == '-':
-            self._on_operator('-')
-        elif text == '*':
-            self._on_operator('*')
-        elif text == '/':
-            self._on_operator('/')
-        elif text == '.':
+        elif text == "+":
+            self._on_operator("+")
+        elif text == "-":
+            self._on_operator("-")
+        elif text == "*":
+            self._on_operator("*")
+        elif text == "/":
+            self._on_operator("/")
+        elif text == ".":
             self._on_decimal()
-        elif text == '(':
+        elif text == "(":
             self._on_open_paren()
-        elif text == ')':
+        elif text == ")":
             self._on_close_paren()
-        elif text == '%':
+        elif text == "%":
             self._on_percent()
-        elif text == '^':
+        elif text == "^":
             self._on_power()
-        elif text == '!':
+        elif text == "!":
             self._on_factorial()
-        elif text == 'π':
-            self._on_constant('pi')
+        elif text == "π":
+            self._on_constant("pi")
         elif key == Qt.Key.Key_Return or key == Qt.Key.Key_Enter:
             self._on_equals()
         elif key == Qt.Key.Key_Backspace:
@@ -713,154 +704,74 @@ class CalculatorWindow(QMainWindow):
     def _change_theme(self, theme_name: str) -> None:
         self.theme_name = theme_name
         self._apply_theme()
-        label = 'Oscuro' if theme_name == 'dark' else 'Claro'
+        label = "Oscuro" if theme_name == "dark" else "Claro"
         self.statusBar().showMessage(f"Tema: {label}")
 
     def _set_angle_mode(self, mode: str) -> None:
-        self.angle_mode = mode
-        self.parser.set_angle_mode(mode)
+        self.view_model.set_angle_mode(mode)
         self._update_mode_indicator()
         self.statusBar().showMessage(f"Modo: {mode.upper()}")
 
     def _on_number(self, digit: str) -> None:
-        if self.has_last_result and not self.current_expression:
-            self.current_expression = ""
-
-        self.current_expression += digit
-        self._update_display()
+        self.view_model.add_number(digit)
 
     def _on_operator(self, op: str) -> None:
-        if not self.current_expression:
-            if self.has_last_result:
-                self.current_expression = self.last_result + op
-            elif op == '-':
-                self.current_expression = '-'
-            self._update_display()
-            return
-
-        last = self.current_expression[-1]
-        if last in '+*/^':
-            self.current_expression = self.current_expression[:-1] + op
-        elif last == '-':
-            if len(self.current_expression) > 1 and self.current_expression[-2] in '+-*/^(':
-                if op != '-':
-                    self.current_expression = self.current_expression[:-1] + op
-            else:
-                self.current_expression = self.current_expression[:-1] + op
-        elif last == '(':
-            if op == '-':
-                self.current_expression += op
-        else:
-            self.current_expression += op
-        self._update_display()
+        self.view_model.add_operator(op)
 
     def _on_decimal(self) -> None:
-        if not self.current_expression:
-            self.current_expression = "0."
-        elif '.' not in self._get_last_number():
-            self.current_expression += '.'
-        self._update_display()
+        self.view_model.add_decimal()
 
     def _on_open_paren(self) -> None:
-        self._append_with_implicit('(')
-        self._update_display()
+        self.view_model.add_open_paren()
 
     def _on_close_paren(self) -> None:
-        if not self.current_expression:
-            return
-
-        if self.current_expression[-1] in '+-*/^(':
-            return
-
-        if self.current_expression.count('(') > self.current_expression.count(')'):
-            self.current_expression += ')'
-        self._update_display()
+        self.view_model.add_close_paren()
 
     def _on_percent(self) -> None:
-        self.current_expression += '%'
-        self._update_display()
+        self.view_model.add_percent()
 
     def _on_negate(self) -> None:
-        if not self.current_expression:
-            return
-
-        last_num = self._get_last_number()
-        if last_num:
-            if last_num.startswith('-'):
-                new_num = last_num[1:]
-            else:
-                new_num = '-' + last_num
-
-            self.current_expression = (
-                self.current_expression[: -len(last_num)] + new_num
-            )
-            self._update_display()
+        self.view_model.toggle_negate()
 
     def _on_square(self) -> None:
-        if self.current_expression:
-            self.current_expression += '^2'
-        elif self.has_last_result:
-            self.current_expression = f"({self.last_result})^2"
-        self._update_display()
+        self.view_model.add_square()
 
     def _on_cube(self) -> None:
-        if self.current_expression:
-            self.current_expression += '^3'
-        elif self.has_last_result:
-            self.current_expression = f"({self.last_result})^3"
-        self._update_display()
+        self.view_model.add_cube()
 
     def _on_power(self) -> None:
-        self.current_expression += '^'
-        self._update_display()
+        self.view_model.add_power()
 
     def _on_sqrt(self) -> None:
-        if self.current_expression:
-            self.current_expression = f"sqrt({self.current_expression})"
-        elif self.has_last_result:
-            self.current_expression = f"sqrt({self.last_result})"
-        self._update_display()
+        self.view_model.add_sqrt()
 
     def _on_factorial(self) -> None:
-        if self.current_expression:
-            self.current_expression += '!'
-        elif self.has_last_result:
-            self.current_expression = f"({self.last_result})!"
-        self._update_display()
+        self.view_model.add_factorial()
 
     def _on_function(self, func_name: str) -> None:
-        self._append_with_implicit(f"{func_name}(")
-        self._update_display()
+        self.view_model.add_function(func_name)
 
     def _on_constant(self, const: str) -> None:
-        symbol = 'π' if const == 'pi' else 'e'
-        self._append_with_implicit(symbol)
-        self._update_display()
+        self.view_model.add_constant(const)
 
     def _on_answer(self) -> None:
-        if self.has_last_result:
-            value = self.last_result
-            if self._needs_implicit_multiplication():
-                self.current_expression += '*'
-            self.current_expression += f"({value})" if value.startswith('-') else value
-            self._update_display()
+        self.view_model.add_answer()
 
     def _on_2nd(self) -> None:
-        """Alterna entre funciones trigonométricas directas e inversas."""
-        self._second_mode = not self._second_mode
+        self.view_model.toggle_second_mode()
 
         toggle_map = {
-            'sin': ('asin', 'sin'),
-            'cos': ('acos', 'cos'),
-            'tan': ('atan', 'tan'),
-            'ln': ('exp', 'ln'),
-            'log': ('10^x', 'log'),
+            "sin": ("asin", "sin"),
+            "cos": ("acos", "cos"),
+            "tan": ("atan", "tan"),
+            "ln": ("exp", "ln"),
+            "log": ("10^x", "log"),
         }
 
         for original_key, (second_text, first_text) in toggle_map.items():
             btn = self.buttons.get(original_key)
             if btn:
-                if self._second_mode:
+                if self.view_model.is_second_mode:
                     btn.setText(second_text)
                 else:
                     btn.setText(first_text)
@@ -870,23 +781,23 @@ class CalculatorWindow(QMainWindow):
                 except (TypeError, RuntimeError):
                     pass
 
-                if self._second_mode:
-                    if second_text == '10^x':
+                if self.view_model.is_second_mode:
+                    if second_text == "10^x":
                         btn.clicked.connect(self._on_10x)
-                    elif second_text == 'exp':
+                    elif second_text == "exp":
                         btn.clicked.connect(self._on_exp)
                     else:
                         btn.clicked.connect(
                             lambda checked=False, f=second_text: self._on_function(f)
                         )
                 else:
-                    if original_key == 'ln':
+                    if original_key == "ln":
                         btn.clicked.connect(
-                            lambda checked=False: self._on_function('ln')
+                            lambda checked=False: self._on_function("ln")
                         )
-                    elif original_key == 'log':
+                    elif original_key == "log":
                         btn.clicked.connect(
-                            lambda checked=False: self._on_function('log')
+                            lambda checked=False: self._on_function("log")
                         )
                     else:
                         btn.clicked.connect(
@@ -895,119 +806,54 @@ class CalculatorWindow(QMainWindow):
 
         self._update_mode_indicator()
         self.statusBar().showMessage(
-            f"Modo secundario: {'activado' if self._second_mode else 'desactivado'}"
+            f"Modo secundario: {'activado' if self.view_model.is_second_mode else 'desactivado'}"
         )
 
     def _on_10x(self) -> None:
-        if self.current_expression:
-            self.current_expression = f"10^({self.current_expression})"
-        elif self.has_last_result:
-            self.current_expression = f"10^({self.last_result})"
-        self._update_display()
+        self.view_model.add_power_10()
 
     def _on_exp(self) -> None:
-        if self.current_expression:
-            self.current_expression = f"exp({self.current_expression})"
-        elif self.has_last_result:
-            self.current_expression = f"exp({self.last_result})"
-        self._update_display()
+        self.view_model.add_exp()
 
     def _on_clear(self) -> None:
-        self.current_expression = ""
+        self.view_model.clear()
         self.display.clear()
         self.statusBar().showMessage("Limpiado")
 
     def _on_delete(self) -> None:
-        if not self.current_expression:
-            return
-
-        func_prefixes = [
-            'asin(', 'acos(', 'atan(', 'sinh(', 'cosh(', 'tanh(',
-            'sin(', 'cos(', 'tan(', 'ln(', 'log(', 'sqrt(', 'exp(',
-            'log2(', 'cbrt(', 'ceil(', 'floor(', 'abs(',
-        ]
-        for func in func_prefixes:
-            if self.current_expression.endswith(func):
-                self.current_expression = self.current_expression[: -len(func)]
-                self._update_display()
-                return
-
-        self.current_expression = self.current_expression[:-1]
-        self._update_display()
+        self.view_model.delete()
 
     def _on_equals(self) -> None:
-        if not self.current_expression:
+        if not self.view_model.display_expression:
             return
-
-        self._auto_close_parentheses()
-
-        try:
-            result = self.parser.evaluate(self.current_expression, self.variables)
-            formatted = self._format_result(result)
-
-            self.history.add(self.current_expression, formatted, self.angle_mode)
-
-            self.display.set_expression("")
-            self.display.set_result(formatted)
-
-            self.last_result = formatted
-            self.has_last_result = True
-            self.current_expression = ""
-
-            self.statusBar().showMessage("Calculado")
-
-        except Exception as e:
+        result_text = self.view_model.calculate()
+        if "Error" in result_text:
             self.display.set_result("Error")
             self.display.set_expression("")
-            self.statusBar().showMessage(f"Error: {e}")
+            self.statusBar().showMessage(result_text)
+        else:
+            self.display.set_expression("")
+            self.display.set_result(result_text)
+            self.statusBar().showMessage("Calculado")
 
     def _on_memory_clear(self) -> None:
-        self.memory = 0.0
-        self.has_memory = False
+        self.view_model.memory_clear()
         self.statusBar().showMessage("Memoria limpiada")
 
     def _on_memory_recall(self) -> None:
-        if self.has_memory:
-            formatted = self._format_result(self.memory)
-            self.current_expression += formatted
-            self._update_display()
-            self.statusBar().showMessage(f"Memoria: {formatted}")
+        formatted = self.view_model.memory_recall()
+        self.statusBar().showMessage(f"Memoria: {formatted}")
 
     def _on_memory_add(self) -> None:
-        try:
-            if self.current_expression:
-                value = self.parser.evaluate(self.current_expression, self.variables)
-            elif self.has_last_result:
-                value = float(self.last_result)
-            else:
-                return
-
-            self.memory += value
-            self.has_memory = True
-            self.statusBar().showMessage(f"M+ = {self._format_result(self.memory)}")
-        except Exception:
-            self.statusBar().showMessage("Error en M+")
+        res = self.view_model.memory_add()
+        self.statusBar().showMessage(f"M+ = {res}")
 
     def _on_memory_subtract(self) -> None:
-        try:
-            if self.current_expression:
-                value = self.parser.evaluate(self.current_expression, self.variables)
-            elif self.has_last_result:
-                value = float(self.last_result)
-            else:
-                return
-
-            self.memory -= value
-            self.has_memory = True
-            self.statusBar().showMessage(f"M- = {self._format_result(self.memory)}")
-        except Exception:
-            self.statusBar().showMessage("Error en M-")
+        res = self.view_model.memory_subtract()
+        self.statusBar().showMessage(f"M- = {res}")
 
     def _update_mode_indicator(self) -> None:
-        mode_text = self.angle_mode.upper()
-        if self._second_mode:
-            mode_text = f"{mode_text} · 2ND"
-        self.mode_indicator.setText(mode_text)
+        self.mode_indicator.setText(self.view_model.get_mode_indicator())
 
     def _copy_result(self) -> None:
         QApplication.clipboard().setText(self.display.result_label.text())
@@ -1016,12 +862,15 @@ class CalculatorWindow(QMainWindow):
     def _paste_expression(self) -> None:
         text = QApplication.clipboard().text()
         if text:
-            self.current_expression += text
+            # No tenemos el método add_text en ViewModel, vamos a agregarlo o usar add_number/operator
+            # Para simplificar, permitamos que el ViewModel reciba un string completo
+            self.view_model.current_expression += text
+            self.view_model._notify()
             self._update_display()
             self.statusBar().showMessage("Expresión pegada")
 
     def _show_history(self) -> None:
-        dialog = HistoryDialog(self.history, self.theme, self)
+        dialog = HistoryDialog(self.view_model.history, self.theme, self)
         dialog.exec()
 
     def _show_converter(self) -> None:
@@ -1065,75 +914,19 @@ class CalculatorWindow(QMainWindow):
         msg.setText(shortcuts_text)
         msg.exec()
 
-    def _append_with_implicit(self, token: str) -> None:
-        if self._needs_implicit_multiplication():
-            self.current_expression += '*'
-        self.current_expression += token
-
-    def _needs_implicit_multiplication(self) -> bool:
-        if not self.current_expression:
-            return False
-
-        last = self.current_expression[-1]
-        return last.isdigit() or last in (')', '!', '%', 'π', 'e')
-
-    def _auto_close_parentheses(self) -> None:
-        opens = self.current_expression.count('(')
-        closes = self.current_expression.count(')')
-        if opens > closes:
-            self.current_expression += ')' * (opens - closes)
-
-    def _format_result(self, value: float) -> str:
-        """Formatea un resultado numérico."""
-        if math.isinf(value):
-            return "∞" if value > 0 else "-∞"
-        if math.isnan(value):
-            return "NaN"
-
-        if value == int(value) and abs(value) < 1e15:
-            return str(int(value))
-
-        if abs(value) >= 1e10 or (abs(value) < 1e-6 and value != 0):
-            return f"{value:.6E}"
-
-        formatted = f"{value:.10g}"
-        if '.' in formatted:
-            formatted = formatted.rstrip('0').rstrip('.')
-
-        return formatted
-
-    def _get_last_number(self) -> str:
-        """Extrae el último número de la expresión actual."""
-        if not self.current_expression:
-            return ""
-
-        i = len(self.current_expression) - 1
-        while i >= 0 and (
-            self.current_expression[i].isdigit()
-            or self.current_expression[i] == '.'
-        ):
-            i -= 1
-
-        if i >= 0 and self.current_expression[i] == '-':
-            if i == 0 or self.current_expression[i - 1] in '+-*/^(':
-                i -= 1
-
-        return self.current_expression[i + 1 :]
-
     def _update_display(self) -> None:
-        """Actualiza el display con la expresión actual."""
-        display_text = self.current_expression
-        display_text = display_text.replace('*', '×').replace('/', '÷')
+        """Actualiza el display con el estado del ViewModel."""
+        expr = self.view_model.display_expression
+        display_text = expr.replace("*", "×").replace("/", "÷")
 
         self.display.set_result(display_text if display_text else "0")
 
-        if not self.current_expression:
+        if not expr:
             self.display.set_preview("")
             return
 
-        try:
-            preview = self.parser.evaluate(self.current_expression, self.variables)
-            preview_text = self._format_result(preview)
-            self.display.set_preview(f"= {preview_text}")
-        except Exception:
+        preview = self.view_model.evaluate_preview(expr)
+        if preview:
+            self.display.set_preview(f"= {preview}")
+        else:
             self.display.set_preview("")

@@ -31,6 +31,7 @@ from PyQt6.QtWidgets import QApplication
 
 from src.core.parser import ExpressionParser
 from src.core.history import HistoryManager
+from src.core.view_model import CalculatorViewModel
 from src.ui.calculator_ui import CalculatorWindow
 
 
@@ -41,14 +42,15 @@ def main():
     app.setApplicationVersion("2.1.0")
     app.setOrganizationName("ScientificCalc")
 
-    parser = ExpressionParser(angle_mode='deg')
+    parser = ExpressionParser(angle_mode="deg")
     history = HistoryManager()
+    view_model = CalculatorViewModel(parser, history)
 
-    window = CalculatorWindow(parser=parser, history=history)
+    window = CalculatorWindow(view_model=view_model)
     window.show()
 
     sys.exit(app.exec())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
